@@ -1,0 +1,142 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/login-fire/social-login-fire.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/json-box/json-box.html">
+<link rel="import" href="../bower_components/poly-me/poly-me-render.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="home-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+    </style>
+
+    <firebase-document
+        app-name="meverse"
+        path$="/users/[[user.uid]]/info"
+        data="[[user]]">
+    </firebase-document>
+
+    <firebase-query
+        id="profiles"
+        app-name="meverse"
+        path$="/users/[[user.uid]]/profiles"
+        data="{{profiles}}">
+    </firebase-query>
+
+    <firebase-document
+        app-name="meverse"
+        path$="/profiles/[[selectedProfile.name]]"
+        data="{{currentProfile}}">
+    </firebase-document>
+
+    <div hidden$="{{signedIn}}">
+        <social-login-fire 
+            id="login" 
+            app-name="meverse"
+            google
+            user="{{user}}"
+            signed-in="{{signedIn}}"
+        ></social-login-fire>
+    </div>
+
+    <template is="dom-if" if="{{signedIn}}">
+        <button on-tap="_signOut">Sign Out</button>
+
+        <!-- Add a profile -->
+
+        <template is="dom-repeat" items="[[profiles]]">
+            [[item.name]] - <button on-tap="_select" profile="[[item]]">Select</button>
+        </template>
+
+        <paper-input label="New profile name" value="{{newProfileName}}"></paper-input>
+        <paper-button raised on-tap="_createProfile">Create</paper-button>
+        
+        <br>
+
+        <!-- Edit a profile -->
+        <template is="dom-if" if="[[selectedProfile]]">
+            Currently selected profile: [[selectedProfile.name]] [[selectedProfile.new]]
+            <json-box id="editor" label="Data for the profile below" start="[[currentProfile]]" current="{{displayedProfile}}"  max-rows="15" show-buttons></json-box>
+            <poly-me-render data="[[displayedProfile]]"></poly-me-render>
+            <paper-button raised on-tap="_saveProfile">Save</paper-button>
+        </template>
+
+    </template>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'home-view',
+      properties: {
+          signedIn: {
+              type: Boolean,
+              value: false
+          }
+      },
+      observers: [
+          "_profileUpdate(currentProfile)"
+      ],
+      _signOut: function(){
+          this.$$("#login").signOut();
+      },
+      _createProfile: function(){
+          this.$$("#profiles").ref.child(this.newProfileName).set({"name": this.newProfileName});
+          this.selectedProfile = this.profiles.find(function(e){ return e.$key === this.newProfileName }.bind(this));
+      },
+      _select: function(e){
+          this.selectedProfile = e.target.profile;
+      },
+      _saveProfile: function(e){
+          this.currentProfile = this.displayedProfile;
+      },
+      _profileUpdate: function(profile){
+          if(Object.keys(profile).length === 0 && profile.constructor === Object){
+              this.currentProfile = {
+                "content": {
+                    "name": "Your name",
+                    "profileImage": "path to profile image",
+                    "backgroundImage": "path to background image",
+                    "position": "Your position or title",
+                    "location": "Your location",
+                    "social": {
+                    "title": "a title to the social section underneath the profile info",
+                    "profiles": [
+                        {
+                        "network": "the icon name from the font awesome cheatsheet see http://fontawesome.io/icons/#brand",
+                        "link": "the link to go to when clicked"
+                        }
+                    ]
+                    },
+                    "sections": [
+                    // See each section's definition
+                    ]
+                },
+                "settings": {
+                    "primaryColor": "The hex value of the primary color for the app - use something close to the background image colors"
+                }
+                };
+          }
+          if(this.$$("#editor")){
+            this.$$("#editor").reset();
+          }
+      },
+    });
+  </script>
+</dom-module>
