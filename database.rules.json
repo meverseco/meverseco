@@ -1,0 +1,20 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        "profiles": {
+          "$pname": {
+            ".write": "$uid === auth.uid && !root.child('profiles').child($pname).exists()"
+          }
+        }
+      }
+    },
+    "profiles": {
+      "$name": {
+        ".read": true,
+        ".write": "root.child('users').child(auth.uid).child('profiles').child($name).exists()"
+      }
+    }
+  }
+}
