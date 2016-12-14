@@ -59,9 +59,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <button on-tap="_signOut">Sign Out</button>
 
         <!-- Add a profile -->
-
+        <h3>Profiles</h3>
         <template is="dom-repeat" items="[[profiles]]">
-            [[item.name]] - <button on-tap="_select" profile="[[item]]">Select</button>
+            [[item.name]] - <button on-tap="_select" profile="[[item]]">Select</button> - <a href$="https://meverse.co/[[item.name]]" target="_blank">View</a>
+            <br>
         </template>
 
         <paper-input label="New profile name" value="{{newProfileName}}"></paper-input>
@@ -71,8 +72,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <!-- Edit a profile -->
         <template is="dom-if" if="[[selectedProfile]]">
-            Currently selected profile: [[selectedProfile.name]] [[selectedProfile.new]]
+            <h3>Edit [[selectedProfile.name]]</h3>
             <json-box id="editor" label="Data for the profile below" start="[[currentProfile]]" current="{{displayedProfile}}"  max-rows="15" show-buttons></json-box>
+            <h3>View [[selectedProfile.name]] after edits</h3>
             <poly-me-render data="[[displayedProfile]]"></poly-me-render>
             <paper-button raised on-tap="_saveProfile">Save</paper-button>
         </template>

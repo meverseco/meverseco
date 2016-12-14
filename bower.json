@@ -18,7 +18,7 @@
     "polymer": "Polymer/polymer#^1.6.0",
     "polymerfire": "^0.10.3",
     "login-fire": "^0.1.1",
-    "json-box": "sbeleidy/json-box",
+    "json-box": "sbeleidy/json-box#^0.0.1",
     "poly-me": "sbeleidy/poly-me#^0.0.3"
   },
   "devDependencies": {
